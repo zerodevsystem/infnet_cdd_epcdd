@@ -1,0 +1,93 @@
+﻿import pandas as pd
+import requests
+import numpy as np
+import streamlit as st
+
+def load_simpsons_data():
+    episodes = pd.read_csv('data/simpsons_episodes.csv')
+    script_lines = pd.read_csv('data/simpsons_script_lines.csv', low_memory=False)
+    combined_data = pd.merge(script_lines, episodes[['id', 'season']], left_on='episode_id', right_on='id', how='left')
+    return combined_data
+
+def classify_sentiment(text, examples):
+    url = "http://179.124.242.238:11434/generate"
+    headers = {"Content-Type": "application/json"}
+    
+    prompt = f"""
+    Classifique o sentimento das seguintes falas dos Simpsons como Positivo, Neutro ou Negativo.
+    Exemplos:
+    {examples}
+    
+    Falas:
+    {text}
+    """
+    
+    data = {"prompt": prompt}
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 200:
+        result = response.text.strip().splitlines()
+        return result[:len(text.splitlines())]
+    else:
+        return ["Erro ao classificar sentimentos."] * len(text.splitlines())
+
+def evaluate_precision(data):
+    """Calcula a precisão para cada classe de sentimento."""
+    precisions = {}
+    for sentiment in ["Positivo", "Neutro", "Negativo"]:
+        true_positive = ((data['sentiment'] == sentiment) & (data['expected_sentiment'] == sentiment)).sum()
+        predicted_positive = (data['sentiment'] == sentiment).sum()
+        precisions[sentiment] = true_positive / predicted_positive if predicted_positive > 0 else 0
+    return precisions
+
+def analyze_simpsons_sentiments():
+    data = load_simpsons_data()
+    episode_lines = data[(data['episode_id'] == 92) & (data['season'] == 5)].copy()
+    
+    examples = """
+    - "Life is beautiful and worth living." -> Positivo
+    - "I don't think there's anything left to say." -> Negativo
+    - "Where is Mr. Bergstrom?" -> Neutro
+    """
+    
+    batch_size = 10
+    lines = episode_lines['spoken_words'].dropna().tolist()
+    batches = [lines[i:i + batch_size] for i in range(0, len(lines), batch_size)]
+    
+    results = []
+    for batch in batches:
+        text = '\n'.join(batch)
+        sentiments = classify_sentiment(text, examples)
+        results.extend(sentiments)
+    
+    if len(results) < len(episode_lines):
+        results.extend(["Erro ao classificar sentimentos."] * (len(episode_lines) - len(results)))
+    elif len(results) > len(episode_lines):
+        results = results[:len(episode_lines)]
+
+    episode_lines['sentiment'] = results
+    
+    distribution = episode_lines['sentiment'].value_counts(normalize=True)
+    accuracy = np.mean(episode_lines['sentiment'] == episode_lines['expected_sentiment'])
+    precision = evaluate_precision(episode_lines)
+    
+    return episode_lines, distribution, accuracy, precision
+
+# Configuração do Streamlit
+st.title("Análise de Sentimentos dos Simpsons")
+st.write("Este aplicativo analisa os sentimentos das falas dos Simpsons.")
+
+# Executar a análise de sentimentos
+episode_lines, distribution, accuracy, precision = analyze_simpsons_sentiments()
+
+# Exibir resultados no Streamlit
+st.subheader("Distribuição de Sentimentos")
+st.bar_chart(distribution)
+
+st.subheader("Acurácia")
+st.write(f"Acurácia: {accuracy:.2f}")
+
+st.subheader("Precisão por Classe")
+st.write(precision)
+
+st.subheader("Exemplo de Falas Classificadas")
+st.dataframe(episode_lines[['spoken_words', 'sentiment']].sample(10, random_state=42))

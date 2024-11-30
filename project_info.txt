@@ -1,0 +1,49 @@
+## Sobre o Projeto e o Modelo
+
+Este projeto foi desenvolvido por Fábio Linhares como parte do Teste de Performance - TP3 para o curso de Engenharia de Prompts para Ciência de Dados [24E4_4] do Instituto Infnet.
+
+O projeto utiliza técnicas avançadas de prompting para realizar diversas tarefas de processamento de linguagem natural, análise de sentimentos e geração de texto, focando principalmente na série "The Simpsons" e em técnicas de engenharia de prompts.
+
+### Modelo Utilizado
+
+O modelo base para este projeto é o **nvidia/llama-3.1-nemotron-70b-instruct**, um Large Language Model (LLM) customizado pela NVIDIA. Este modelo é uma versão aprimorada do Llama, projetada para melhorar a utilidade e relevância das respostas geradas.
+
+Características do modelo:
+- Grande capacidade de processamento de linguagem natural
+- Customizado para melhorar a qualidade e relevância das respostas
+- Capaz de entender e responder em múltiplos idiomas, incluindo português
+- Atualizado regularmente para manter-se em dia com informações recentes
+- Adaptável a diversos contextos e tipos de tarefas
+
+### Objetivos e Técnicas Utilizadas
+
+- **Few-Shot Learning**: Demonstrar a capacidade do modelo de aprender com poucos exemplos.
+- **Segurança e Validação**: Implementar técnicas para tornar o uso do LLM mais seguro e confiável.
+- **Análise de Sentimento**: Aplicar técnicas de NLP para categorizar textos baseados em sentimento.
+- **Processamento de Grandes Volumes de Texto**: Utilizar chunking e outras técnicas para lidar com textos longos.
+- **Avaliação de Qualidade**: Usar métricas padrão da indústria para avaliar a qualidade dos textos gerados.
+- **Visualização de Dados**: Criar interfaces interativas para apresentar os resultados das análises.
+
+Este projeto abrangente visa não apenas demonstrar o domínio de técnicas avançadas de prompting, mas também desenvolver habilidades práticas em processamento de linguagem natural, análise de dados e desenvolvimento de aplicações.
+
+### Sobre a Implementação
+
+Esta implementação utiliza uma abordagem que separa o conteúdo informativo do código, oferecendo várias vantagens:
+
+1. **Separação de Conteúdo e Código**: O texto informativo está separado do código, facilitando a manutenção e atualização de ambos.
+
+2. **Flexibilidade**: O conteúdo do texto pode ser atualizado facilmente sem modificar o código Python.
+
+3. **Reutilização**: As mesmas informações podem ser utilizadas em outros scripts ou partes do projeto, simplesmente lendo o mesmo arquivo.
+
+4. **Tratamento de Erros**: O código inclui um tratamento básico de erros para o caso do arquivo não ser encontrado.
+
+### Informações Adicionais
+
+- **Autor**: Fábio Linhares
+- **Curso**: Engenharia de Prompts para Ciência de Dados [24E4_4]
+- **Tarefa**: Teste de Performance - TP3 [Obrigatório]
+- **Instituição**: Instituto Infnet
+- **Modelo**: https://build.nvidia.com/nvidia/llama-3_1-nemotron-70b-instruct
+
+Este projeto é parte integrante da formação em Ciência de Dados, demonstrando a aplicação prática de técnicas avançadas de engenharia de prompts no contexto de análise de dados e processamento de linguagem natural.
