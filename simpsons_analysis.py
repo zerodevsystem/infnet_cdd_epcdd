@@ -2,20 +2,32 @@ import pandas as pd
 import tiktoken
 import streamlit as st
 import matplotlib.pyplot as plt
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
+
+
 from openai import OpenAI
 from summary_metrics import compare_summaries, analyze_convergence
 
-load_dotenv()
+# Carrega as variáveis de ambiente
+load_dotenv(override=True)
 
-OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL')
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-OPENAI_MODEL = os.getenv('OPENAI_MODEL')
-TEMPERATURE = float(os.getenv('TEMPERATURE'))
-TOP_P = float(os.getenv('TOP_P'))
-MAX_TOKENS = int(os.getenv('MAX_TOKENS'))
+# Função para obter variáveis de ambiente com validação
+def get_env(key, default=None, required=False):
+    value = os.getenv(key, default)
+    if required and value is None:
+        raise ValueError(f"A variável de ambiente '{key}' é obrigatória, mas não foi definida.")
+    return value.strip() if isinstance(value, str) else value
 
+# Configurações da API
+OPENAI_BASE_URL = get_env('OPENAI_BASE_URL', required=True)
+OPENAI_API_KEY = get_env('OPENAI_API_KEY', required=True)
+OPENAI_MODEL = get_env('OPENAI_MODEL', required=True)
+TEMPERATURE = float(get_env('TEMPERATURE', '0.5'))
+TOP_P = float(get_env('TOP_P', '1.0'))
+MAX_TOKENS = int(get_env('MAX_TOKENS', '1024'))
+
+# Inicialização do cliente OpenAI
 client = OpenAI(
     base_url=OPENAI_BASE_URL,
     api_key=OPENAI_API_KEY
@@ -144,13 +156,6 @@ def summarize_episode(episode_id, season):
     
     return summary, token_count
 
-# def analyze_episode(episode_id, season):
-#     summary, token_count = summarize_episode(episode_id, season)
-    
-#     st.subheader(f"Resumo do Episódio {episode_id} da Temporada {season}")
-#     st.write(summary)
-#     st.write(f"Número de tokens no resumo: {token_count}")
-
 def analyze_episode(episode_id, season):
     summary, token_count = summarize_episode(episode_id, season)
     return summary, token_count
@@ -160,6 +165,8 @@ def test_api_connection():
     try:
         print(f"Attempting to connect to {OPENAI_BASE_URL}")
         print(f"Using model: {OPENAI_MODEL}")
+        print(f"API Key (primeiros 5 caracteres): {OPENAI_API_KEY[:5]}...")
+        
         completion = client.chat.completions.create(
             model=OPENAI_MODEL,
             messages=[{"role": "user", "content": "Hello"}],
@@ -167,6 +174,7 @@ def test_api_connection():
             top_p=TOP_P,
             max_tokens=MAX_TOKENS
         )
+        
         print("API connection successful!")
         print(f"Response: {completion.choices[0].message.content}")
         return True
@@ -175,7 +183,6 @@ def test_api_connection():
         print(f"Error type: {type(e).__name__}")
         print(f"Error details: {e.args}")
         return False
-
 
 def create_chunks(lines, chunk_size=100, overlap=25):
     chunks = []
